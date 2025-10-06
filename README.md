@@ -1,6 +1,12 @@
-# Canvas Editor
+# Canvas Editor 
+
+
 
 A real-time collaborative drawing application that allows users to create and save digital artwork directly in the browser. Built with React, Fabric.js, and Firebase.
+
+## 🚀 Live Demo
+
+ [https://canvaseditorrr.netlify.app/](https://canvaseditorrr.netlify.app/)
 
 ## Features
 
