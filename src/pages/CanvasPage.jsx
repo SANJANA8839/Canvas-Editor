@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import CanvasEditor from "../components/CanvasEditor";
 import "../components/canvasEditor.css";
 
@@ -8,7 +8,17 @@ function CanvasPage() {
   return (
     <div className="canvas-editor-container">
       <div className="canvas-header">
-        <p className="canvas-subtitle"> Start doing your own creativity  </p>
+        <p className="canvas-subtitle">Unleash Your Creativity</p>
+        <div className="page-navigation">
+          <Link to="/" className="home-link">
+            ← Back to Home
+          </Link>
+          {canvasId && (
+            <div className="canvas-session-info">
+              Canvas ID: {canvasId.substring(0, 8)}...
+            </div>
+          )}
+        </div>
       </div>
       
       <div className="canvas-editor-content">

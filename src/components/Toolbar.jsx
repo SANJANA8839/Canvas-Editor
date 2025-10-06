@@ -1,17 +1,54 @@
-import React from "react";
+import React, { useState } from "react";
 import "./canvasEditor.css";
 
 const Toolbar = ({ setTool, addShape, saveCanvas }) => {
+  const [activeButton, setActiveButton] = useState(null);
+
+  const handleToolClick = (toolName) => {
+    setActiveButton(toolName);
+    setTool(toolName);
+  };
+
   return (
     <>
-      <button className="tool-button" onClick={() => setTool("rectangle")}>Rectangle</button>
-      <button className="tool-button" onClick={() => setTool("circle")}>Circle</button>
-      <button className="tool-button" onClick={() => setTool("line")}>Line</button>
-      <button className="tool-button" onClick={() => setTool("text")}>Text</button>
-      <button className="tool-button" onClick={() => setTool("pen")}>Pen</button>
-      <button className="tool-button" onClick={() => setTool("eraser")}>Eraser</button>
       <button 
-        className="tool-button" 
+        className={`tool-button ${activeButton === "rectangle" ? "active" : ""}`} 
+        onClick={() => handleToolClick("rectangle")}
+      >
+        Rectangle
+      </button>
+      <button 
+        className={`tool-button ${activeButton === "circle" ? "active" : ""}`} 
+        onClick={() => handleToolClick("circle")}
+      >
+        Circle
+      </button>
+      <button 
+        className={`tool-button ${activeButton === "line" ? "active" : ""}`} 
+        onClick={() => handleToolClick("line")}
+      >
+        Line
+      </button>
+      <button 
+        className={`tool-button ${activeButton === "text" ? "active" : ""}`} 
+        onClick={() => handleToolClick("text")}
+      >
+        Text
+      </button>
+      <button 
+        className={`tool-button ${activeButton === "pen" ? "active" : ""}`} 
+        onClick={() => handleToolClick("pen")}
+      >
+        Pen
+      </button>
+      <button 
+        className={`tool-button ${activeButton === "eraser" ? "active" : ""}`} 
+        onClick={() => handleToolClick("eraser")}
+      >
+        Eraser
+      </button>
+      <button 
+        className="tool-button save-button"
         onClick={saveCanvas}
         style={{ 
           backgroundColor: "rgba(14, 165, 233, 0.3)", 
