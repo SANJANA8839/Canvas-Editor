@@ -37,7 +37,7 @@ const CanvasEditor = ({ canvasId }) => {
     initCanvas.freeDrawingBrush.width = 5;
     initCanvas.freeDrawingBrush.color = "black";
     
-    // Set up selection events
+    
     initCanvas.on('selection:created', (e) => {
       setSelectedObject(e.selected[0]);
       if (e.selected[0].type === 'textbox') {
@@ -118,7 +118,32 @@ const CanvasEditor = ({ canvasId }) => {
                     obj = new fabric.Circle(objData);
                     break;
                   case 'path':
-                    obj = new fabric.Path(objData.path, objData);
+                    try {
+                      let pathData;
+                      
+                      if (objData.pathString) {
+                        try {
+                          pathData = JSON.parse(objData.pathString);
+                        } catch (e) {
+                          console.warn("Could not parse pathString:", e);
+                          pathData = objData.pathString;
+                        }
+                      } else if (objData.path) {
+                        pathData = objData.path;
+                      } else {
+                        pathData = "M 0 0 L 100 100";
+                      }
+                      
+                      obj = new fabric.Path(pathData, objData);
+                    } catch (pathError) {
+                      console.error("Error creating path object:", pathError);
+                      
+                      obj = new fabric.Path("M 0 0 L 10 10", {
+                        ...objData,
+                        stroke: objData.stroke || "#000000",
+                        fill: null
+                      });
+                    }
                     break;
                   case 'line':
                     obj = new fabric.Line(objData.points || [0, 0, 100, 100], objData);
@@ -415,14 +440,29 @@ const CanvasEditor = ({ canvasId }) => {
           };
         }
         else if (obj.type === 'path') {
+          // Convert path data to a serialized format to avoid nested arrays
+          // Fabric.js path data can be complex arrays with commands and coordinates
           let pathData = obj.path;
-          if (pathData && pathData.length > 100) {
-            pathData = pathData.filter((_, index) => index % 2 === 0);
+          let serializedPath;
+          
+          try {
+            // Handle different path data formats safely
+            if (Array.isArray(pathData)) {
+              // Serialize the path data to a string representation
+              // This avoids nested arrays that Firestore doesn't support
+              serializedPath = JSON.stringify(pathData);
+            } else {
+              // If it's already a string or another format, keep it
+              serializedPath = String(pathData);
+            }
+          } catch (err) {
+            console.warn("Error serializing path data:", err);
+            serializedPath = "";
           }
           
           return {
             ...baseProps,
-            path: pathData,
+            pathString: serializedPath, // Use string instead of array
             stroke: obj.stroke || '#000000',
             strokeWidth: obj.strokeWidth || 1,
             fill: null,

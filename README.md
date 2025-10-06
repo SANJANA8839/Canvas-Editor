@@ -1,16 +1,55 @@
-# React + Vite
+# Canvas Editor
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A real-time collaborative drawing application that allows users to create and save digital artwork directly in the browser. Built with React, Fabric.js, and Firebase.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Drawing Tools**: Pen, shapes (rectangle, circle, line), and text tools
+- **Color Selection**: Choose colors for all drawing elements
+- **Object Manipulation**: Select, move, resize, and delete objects
+- **Real-time Saving**: Automatically saves your work to Firebase
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend**: React js, Fabric.js 
+- **Backend**: Firebase (Firestore)
+- **Routing**: React Router
+- **Build Tool**: Vite
+- **Canvas** : fabric.js
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. **Clone and run**
+
+`ash
+git clone https://github.com/SANJANA8839/Canvas-Editor.git
+cd canvas-editor
+`
+
+
+`ash
+npm install
+`
+
+
+`ash
+npm run dev
+`
+
+## How It Works
+
+The Canvas Editor uses Fabric.js to create an interactive canvas where users can draw and manipulate objects. Each drawing is saved to Firebase Firestore, allowing users to access their work from anywhere.
+
+The application provides:
+- A clean, intuitive user interface
+- High-performance canvas rendering
+- Efficient storage of drawing data
+
+## Special Mentions
+
+- **Fabric.js**: Powers the interactive canvas with excellent object manipulation capabilities
+- **Firebase**: Provides real-time database functionality for saving and loading canvases
+
+## License
+
+MIT
