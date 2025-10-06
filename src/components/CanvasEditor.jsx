@@ -81,6 +81,12 @@ const CanvasEditor = ({ canvasId }) => {
         return;
       }
       
+      if (!initCanvas || !initCanvas.lowerCanvasEl) {
+        console.error("Canvas not properly initialized");
+        setIsLoading(false);
+        return;
+      }
+      
       try {
         console.log("Loading canvas data for canvasId:", canvasId);
         const canvasDocRef = doc(db, "canvases", canvasId);
@@ -110,59 +116,75 @@ const CanvasEditor = ({ canvasId }) => {
               try {
                 let obj;
                 
-                switch (objData.type) {
+                if (!objData || typeof objData !== 'object') {
+                  console.warn("Invalid object data:", objData);
+                  return; 
+                }
+                
+                const { type, ...objDataWithoutType } = objData;
+                
+                if (!type) {
+                  console.warn("Object missing type property:", objData);
+                  return;
+                }
+                
+                switch (type) {
                   case 'rect':
-                    obj = new fabric.Rect(objData);
+                    obj = new fabric.Rect(objDataWithoutType);
                     break;
                   case 'circle':
-                    obj = new fabric.Circle(objData);
+                    obj = new fabric.Circle(objDataWithoutType);
                     break;
                   case 'path':
                     try {
                       let pathData;
                       
-                      if (objData.pathString) {
+                      if (objDataWithoutType.pathString) {
                         try {
-                          pathData = JSON.parse(objData.pathString);
+                          pathData = JSON.parse(objDataWithoutType.pathString);
                         } catch (e) {
                           console.warn("Could not parse pathString:", e);
-                          pathData = objData.pathString;
+                          pathData = objDataWithoutType.pathString;
                         }
-                      } else if (objData.path) {
-                        pathData = objData.path;
+                      } else if (objDataWithoutType.path) {
+                        pathData = objDataWithoutType.path;
                       } else {
                         pathData = "M 0 0 L 100 100";
                       }
                       
-                      obj = new fabric.Path(pathData, objData);
+                      obj = new fabric.Path(pathData, objDataWithoutType);
                     } catch (pathError) {
                       console.error("Error creating path object:", pathError);
                       
                       obj = new fabric.Path("M 0 0 L 10 10", {
-                        ...objData,
-                        stroke: objData.stroke || "#000000",
+                        ...objDataWithoutType,
+                        stroke: objDataWithoutType.stroke || "#000000",
                         fill: null
                       });
                     }
                     break;
                   case 'line':
-                    obj = new fabric.Line(objData.points || [0, 0, 100, 100], objData);
+                    obj = new fabric.Line(objDataWithoutType.points || [0, 0, 100, 100], objDataWithoutType);
                     break;
                   case 'textbox':
-                    obj = new fabric.Textbox(objData.text || "Text", objData);
+                    obj = new fabric.Textbox(objDataWithoutType.text || "Text", objDataWithoutType);
                     break;
                   case 'text':
-                    obj = new fabric.Text(objData.text || "Text", objData);
+                    obj = new fabric.Text(objDataWithoutType.text || "Text", objDataWithoutType);
                     break;
                   default:
-                    console.log("Unknown object type:", objData.type);
+                    console.log("Unknown object type:", type);
                 }
                 
                 if (obj) {
-                  initCanvas.add(obj);
+                  try {
+                    initCanvas.add(obj);
+                  } catch (addError) {
+                    console.error("Error adding object to canvas:", addError);
+                  }
                 }
               } catch (error) {
-                console.error("Error adding object:", error);
+                console.error("Error creating object:", error);
               }
             });
             
