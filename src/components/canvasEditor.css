@@ -435,9 +435,14 @@
 /* Add a subtle shadow to the canvas */
 .canvas-wrapper canvas {
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
-  display: block; /* Ensure canvas is properly displayed as block */
-  visibility: visible !important; /* Force visibility */
-  opacity: 1 !important; /* Ensure opacity */
+  display: block; 
+  visibility: visible !important; 
+  opacity: 1 !important; 
+  image-rendering: -webkit-optimize-contrast; 
+  image-rendering: crisp-edges; 
+  transform: translateZ(0); 
+  backface-visibility: hidden; 
+  perspective: 1000px; 
 }
 
 /* Tips section styling */

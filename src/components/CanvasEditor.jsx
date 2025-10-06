@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-// import { fabric } from "fabric";
 import * as fabric from "fabric";
 import Toolbar from "./Toolbar";
 import "./canvasEditor.css";
@@ -14,31 +13,26 @@ const CanvasEditor = ({ canvasId }) => {
   const [objectColor, setObjectColor] = useState("#ff0000");
   const [isLoading, setIsLoading] = useState(true);
 
-  // We've moved the loadCanvasData functionality directly into the useEffect
-
   useEffect(() => {
-    // Don't initialize the canvas until the ref is available
     if (!canvasRef.current) return;
     
     setIsLoading(true);
     console.log("Initializing canvas with ID:", canvasId);
     
-    // Make sure we have a clean start
     const canvasElement = canvasRef.current;
     
-    // Create a new canvas instance
-    const initCanvas = new fabric.Canvas(canvasElement);
+    const initCanvas = new fabric.Canvas(canvasElement, {
+      enableRetinaScaling: true,
+      renderOnAddRemove: false 
+    });
     
-    // Configure the canvas after creation
     initCanvas.setWidth(800);
     initCanvas.setHeight(500);
     initCanvas.backgroundColor = "#fff";
     initCanvas.selection = true;
     
-    // Force a render to initialize properly
     initCanvas.renderAll();
     
-    // Initialize drawing brush
     initCanvas.freeDrawingBrush = new fabric.PencilBrush(initCanvas);
     initCanvas.freeDrawingBrush.width = 5;
     initCanvas.freeDrawingBrush.color = "black";
@@ -69,7 +63,6 @@ const CanvasEditor = ({ canvasId }) => {
       setTextValue("");
     });
     
-    // Set up keyboard delete event
     const handleKeyDown = (e) => {
       if (e.key === 'Delete' && initCanvas.getActiveObject()) {
         initCanvas.remove(initCanvas.getActiveObject());
@@ -79,7 +72,6 @@ const CanvasEditor = ({ canvasId }) => {
     
     document.addEventListener('keydown', handleKeyDown);
     
-    // Set the canvas in state
     setCanvas(initCanvas);
     
     // Function to load canvas data
@@ -97,7 +89,6 @@ const CanvasEditor = ({ canvasId }) => {
         if (docSnap.exists() && docSnap.data().data) {
           const savedData = docSnap.data().data;
           
-          // Load objects based on the format
           if (savedData.version && savedData.objects) {
             console.log("Loading canvas with", savedData.objects.length, "objects");
             
@@ -107,16 +98,14 @@ const CanvasEditor = ({ canvasId }) => {
               const height = savedData.canvasProps.height || 500;
               const bgColor = savedData.canvasProps.backgroundColor || '#fff';
               
-              // Set dimensions
               initCanvas.setWidth(width);
               initCanvas.setHeight(height);
               initCanvas.backgroundColor = bgColor;
             }
             
-            // Load objects using proper approach
             const objects = savedData.objects || [];
             
-            // Load each object individually to avoid issues
+            // Loading each object individually 
             objects.forEach(objData => {
               try {
                 let obj;
@@ -155,7 +144,6 @@ const CanvasEditor = ({ canvasId }) => {
             // Render the canvas
             initCanvas.renderAll();
           } else {
-            // Original format - try direct loading
             try {
               initCanvas.loadFromJSON(savedData, () => {
                 console.log("Canvas loaded (original format)");
@@ -172,15 +160,11 @@ const CanvasEditor = ({ canvasId }) => {
         console.error("Error loading canvas:", error);
       }
       
-      // Always set loading to false when done
-      setTimeout(() => {
         initCanvas.renderAll();
         setIsLoading(false);
-      }, 300);
     };
     
-    // Load canvas data after a delay to ensure proper initialization
-    setTimeout(loadCanvasFromFirestore, 500);
+    loadCanvasFromFirestore();
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
@@ -194,18 +178,14 @@ const CanvasEditor = ({ canvasId }) => {
   useEffect(() => {
     if (!canvas) return;
     
-    // Function to ensure canvas is properly rendered
     const ensureCanvasRendered = () => {
       try {
-        // Force recalculation of object coordinates
         canvas.calcOffset();
         
-        // Make sure all objects are visible
         canvas.getObjects().forEach(obj => {
           obj.visible = true;
         });
         
-        // Render all objects
         canvas.renderAll();
         
         console.log("Canvas rendered with", canvas.getObjects().length, "objects");
@@ -213,41 +193,30 @@ const CanvasEditor = ({ canvasId }) => {
         console.error("Error rendering canvas:", error);
       }
     };
-    
-    // Execute immediately
+ 
     ensureCanvasRendered();
     
-    // Also execute after delays to catch any async operations
-    const renderTimers = [300, 1000].map(delay => 
-      setTimeout(ensureCanvasRendered, delay)
-    );
     
-    // Clean up timers
     return () => {
-      renderTimers.forEach(clearTimeout);
     };
   }, [canvas]);
 
-  // Add auto-save functionality when canvas changes
   useEffect(() => {
     if (!canvas || !canvasId) return;
 
-    // Set up object modification events for auto-save
     const autoSaveHandler = () => {
       console.log("Canvas changed, auto-saving...");
-      // Debounce the auto-save to prevent too many Firestore writes
       const saveData = canvas.toJSON();
       localStorage.setItem(`canvasData_${canvasId}_autosave`, JSON.stringify(saveData));
     };
 
-    // Events that should trigger auto-save
     canvas.on('object:added', autoSaveHandler);
     canvas.on('object:removed', autoSaveHandler);
     canvas.on('object:modified', autoSaveHandler);
     canvas.on('path:created', autoSaveHandler);
 
     return () => {
-      // Clean up event listeners
+
       if (canvas) {
         canvas.off('object:added', autoSaveHandler);
         canvas.off('object:removed', autoSaveHandler);
@@ -260,7 +229,7 @@ const CanvasEditor = ({ canvasId }) => {
   // ---- Shape Functions ----
   const addShape = (type) => {
     if (!canvas) return;
-    canvas.isDrawingMode = false; // Pen/eraser off
+    canvas.isDrawingMode = false; 
 
     let shape;
     switch (type) {
@@ -303,7 +272,6 @@ const CanvasEditor = ({ canvasId }) => {
     if (!canvas) return;
     canvas.isDrawingMode = false;
     
-    // Create a text object with explicit properties for better serialization
     const text = new fabric.Textbox('Double click to edit', {
       left: 50,
       top: 50,
@@ -313,7 +281,6 @@ const CanvasEditor = ({ canvasId }) => {
       width: 200,
       editable: true,
       selectable: true,
-      // Only include essential properties
       includeDefaultValues: false
     });
     
@@ -341,7 +308,6 @@ const CanvasEditor = ({ canvasId }) => {
     canvas.renderAll();
   };
   
-  // ---- Update Object Color ----
   const updateObjectColor = (color) => {
     setObjectColor(color);
     
@@ -360,7 +326,6 @@ const CanvasEditor = ({ canvasId }) => {
   const setTool = (tool) => {
     if (!canvas) return;
 
-    // First disable drawing mode to reset
     canvas.isDrawingMode = false;
 
     switch (tool) {
@@ -368,16 +333,14 @@ const CanvasEditor = ({ canvasId }) => {
         addText();
         break;
       case "pen":
-        // Create a fresh pencil brush with simplified properties
         canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
         canvas.freeDrawingBrush.width = 5;
         canvas.freeDrawingBrush.color = objectColor;
-        canvas.freeDrawingBrush.decimate = 8; // Simplify paths for better serialization
+        canvas.freeDrawingBrush.decimate = 8;
         canvas.isDrawingMode = true;
         console.log("Pen mode activated");
         break;
       case "eraser":
-        // For eraser, we use the same brush but with background color
         canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
         canvas.freeDrawingBrush.width = 20;
         canvas.freeDrawingBrush.color = canvas.backgroundColor || "#fff";
@@ -393,11 +356,9 @@ const CanvasEditor = ({ canvasId }) => {
         addShape(tool);
         break;
       default:
-        // Selection mode
         break;
     }
     
-    // Force a re-render to update the canvas
     canvas.renderAll();
   };
 
@@ -406,12 +367,9 @@ const CanvasEditor = ({ canvasId }) => {
     if (!canvas || !canvasId) return;
     
     try {
-      // Make sure all objects are properly rendered and captured
-      canvas.renderAll();
       
-      // Manually capture the objects to avoid serialization issues
+      canvas.renderAll();
       const objects = canvas.getObjects().map(obj => {
-        // Get base properties common to all objects
         const baseProps = {
           type: obj.type,
           left: obj.left,
@@ -424,8 +382,7 @@ const CanvasEditor = ({ canvasId }) => {
           opacity: obj.opacity,
           visible: true,
         };
-        
-        // Add specific properties based on object type
+
         if (obj.type === 'rect') {
           return {
             ...baseProps,
@@ -458,7 +415,6 @@ const CanvasEditor = ({ canvasId }) => {
           };
         }
         else if (obj.type === 'path') {
-          // Simplify paths to prevent issues
           let pathData = obj.path;
           if (pathData && pathData.length > 100) {
             pathData = pathData.filter((_, index) => index % 2 === 0);
@@ -484,12 +440,10 @@ const CanvasEditor = ({ canvasId }) => {
           };
         }
         else {
-          // For other object types
           return baseProps;
         }
       });
       
-      // Format data for storage
       const simplifiedData = {
         version: 2,
         canvasProps: {
@@ -517,14 +471,12 @@ const CanvasEditor = ({ canvasId }) => {
     }
   };
 
-  // Debug function to force canvas reload
   const debugForceReload = () => {
     if (!canvas) return;
     
     console.log("Forcing canvas reload...");
     console.log("Current objects:", canvas.getObjects().length);
     
-    // Re-render canvas
     canvas.renderAll();
   };
 
@@ -546,7 +498,7 @@ const CanvasEditor = ({ canvasId }) => {
         <button 
           className="tool-button" 
           onClick={debugForceReload}
-          style={{ display: 'none' }} // Hidden for normal usage
+          style={{ display: 'none' }} 
         >
           Force Reload
         </button>
@@ -598,7 +550,8 @@ const CanvasEditor = ({ canvasId }) => {
             width: "800px", 
             height: "500px",
             visibility: "visible",
-            opacity: 1
+            opacity: 1,
+            imageRendering: "crisp-edges" // Improve rendering quality
           }} 
           width="800" 
           height="500"
@@ -607,7 +560,7 @@ const CanvasEditor = ({ canvasId }) => {
       </div>
       
       <div className="tips-section">
-        <div className="tips-title">Confused? Don't worry!</div>
+        <div className="tips-title">Confused ?</div>
         <div className="tips-title">These tips can guide you:</div>
         <ul className="tips-list">
           <li>Select objects by clicking on them</li>

@@ -8,7 +8,7 @@ function Home() {
 
   const createCanvas = async () => {
     const docRef = await addDoc(collection(db, "canvases"), {
-      data: null // initially empty
+      data: null 
     });
     navigate(`/canvas/${docRef.id}`);
   };
