@@ -462,19 +462,13 @@ const CanvasEditor = ({ canvasId }) => {
           };
         }
         else if (obj.type === 'path') {
-          // Convert path data to a serialized format to avoid nested arrays
-          // Fabric.js path data can be complex arrays with commands and coordinates
           let pathData = obj.path;
           let serializedPath;
           
           try {
-            // Handle different path data formats safely
             if (Array.isArray(pathData)) {
-              // Serialize the path data to a string representation
-              // This avoids nested arrays that Firestore doesn't support
               serializedPath = JSON.stringify(pathData);
             } else {
-              // If it's already a string or another format, keep it
               serializedPath = String(pathData);
             }
           } catch (err) {
@@ -484,7 +478,7 @@ const CanvasEditor = ({ canvasId }) => {
           
           return {
             ...baseProps,
-            pathString: serializedPath, // Use string instead of array
+            pathString: serializedPath, 
             stroke: obj.stroke || '#000000',
             strokeWidth: obj.strokeWidth || 1,
             fill: null,
@@ -526,11 +520,15 @@ const CanvasEditor = ({ canvasId }) => {
       });
       
       console.log("Canvas saved with", objects.length, "objects");
-      alert("Canvas saved successfully!");
+      styledAlert(`Canvas saved successfully with ${objects.length} objects!`);
     } catch (error) {
       console.error("Error saving canvas:", error);
-      alert("Failed to save canvas. Please try again.");
+      alert("❌ Failed to save canvas. Please try again.");
     }
+  };
+
+  const styledAlert = (message) => {
+    alert(`✅ ${message}`);
   };
 
   const debugForceReload = () => {
@@ -613,7 +611,7 @@ const CanvasEditor = ({ canvasId }) => {
             height: "500px",
             visibility: "visible",
             opacity: 1,
-            imageRendering: "crisp-edges" // Improve rendering quality
+            imageRendering: "crisp-edges" 
           }} 
           width="800" 
           height="500"
